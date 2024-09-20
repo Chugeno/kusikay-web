@@ -1,15 +1,21 @@
-import Image, { ImageProps } from 'next/image'
+import Image from 'next/image'
 
-interface CustomImageProps extends Omit<ImageProps, 'src'> {
+type CustomImageProps = {
   src: string
+  alt: string
+  width: number
+  height: number
+  className?: string
 }
 
-const CustomImage = ({ src, alt, ...props }: CustomImageProps) => {
-  const imageSrc = process.env.NODE_ENV === 'production'
-    ? `https://tu-url-de-vercel-blob.com/${src}`
-    : `/images/${src}`
-
-  return <Image src={imageSrc} alt={alt} {...props} />
+export default function CustomImage({ src, alt, width, height, className }: CustomImageProps) {
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      width={width}
+      height={height}
+      className={className}
+    />
+  )
 }
-
-export default CustomImage

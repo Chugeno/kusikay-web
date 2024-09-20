@@ -1,274 +1,202 @@
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import Link from 'next/link'
+import { useState, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
+import { yupResolver } from '@hookform/resolvers/yup'
+import * as yup from 'yup'
+import { Input } from "../components/ui/input"
+import { Textarea } from "../components/ui/textarea"
+import { Label } from "../components/ui/label"
+import { Button } from "../components/ui/button"
+import { Checkbox } from "../components/ui/checkbox"
 
-const translations = {
-  en: {
-    language: 'English',
-    title: 'Quotation',
-    subtitle: 'Request a quote for your project',
-    customerInfo: 'Customer Information',
-    fullName: 'Full name',
-    phoneNumber: 'Phone number',
-    email: 'Email',
-    ventureDescription: 'Description of the Venture',
-    ventureAbout: 'What is your venture about?',
-    productsServices: 'What are the products or services you offer?',
-    targetAudience: 'Who are you targeting?',
-    slogan: 'Do you have a slogan or words that identify you?',
-    socialNetworks: 'Social networks',
-    illustrationUse: 'Use of Illustration',
-    illustrationUseOptions: {
-      logo: 'Logo. Image or identity of the brand and/or company.',
-      flyer: 'Flyer. Promotion and/or campaign with a defined duration.',
-      socialMedia: 'Publication in social networks (feed).',
-      socialMediaPack: 'Pack of elements for publications on social networks (feed).',
-      instagramStory: 'Story on Instagram.',
-      packaging: 'Product packaging.',
-      reproduction: 'For constant reproduction inside a paid product (clothing, accessories, stickers, music album, digital or physical book cover).',
-    },
-    contentMessage: 'Content or Message',
-    contentMessageDescription: 'This is not about describing the exact idea or characters, but what is the message you would like to communicate.',
-    contentMessageExample: 'Example: I would like the image to convey peace, calm, silence. Something meditative and healing but not the typical image of a meditating Buddha.',
-    contentMessageQuestion: 'What do you want the illustration to communicate?',
-    keywords: 'Key Words',
-    keywordsDescription: 'Describe 5 characteristics or feelings you want this work to convey:',
-    keywordsExample: 'Example: beachy, relaxed, tropical, fruity, tasty.',
-    style: 'Style',
-    styleDescription: 'The idea is that you can choose, within my work, between 3 and 5 reference images so I understand what kind of image you would like to achieve. For that you can look at my social networks:',
-    graphicElements: 'Graphic Elements',
-    graphicElementsOptions: {
-      harmony: 'I have graphic elements of my venture and I want to continue in harmony with that line.',
-      change: 'I have graphic elements but I am looking for a change from that aesthetic.',
-      create: 'I don\'t have them and I want to create them.',
-    },
-    text: 'Text',
-    textDescription: 'In case the illustration is accompanied by text, write here the exact word(s):',
-    deliveryDate: 'Delivery Date',
-    deliveryDateQuestion: 'On what date do you need the final delivery of the illustration:',
-    importantInfo: 'Important Information',
-    importantInfoQuestion: 'Is there anything else I haven\'t asked that needs to be considered for the project?',
-    submit: 'Submit Quotation Request',
-  },
-  es: {
-    language: 'Español',
-    title: 'Cotización',
-    subtitle: 'Solicita una cotización para tu proyecto',
-    customerInfo: 'Información del Cliente',
-    fullName: 'Nombre completo',
-    phoneNumber: 'Número de teléfono',
-    email: 'Correo electrónico',
-    ventureDescription: 'Descripción del Emprendimiento',
-    ventureAbout: '¿De qué trata tu emprendimiento?',
-    productsServices: '¿Cuáles son los productos o servicios que ofreces?',
-    targetAudience: '¿A quién te diriges?',
-    slogan: '¿Tienes un eslogan o palabras que te identifiquen?',
-    socialNetworks: 'Redes sociales',
-    illustrationUse: 'Uso de la Ilustración',
-    illustrationUseOptions: {
-      logo: 'Logo. Imagen o identidad de la marca y/o empresa.',
-      flyer: 'Flyer. Promoción y/o campaña con una duración definida.',
-      socialMedia: 'Publicación en redes sociales (feed).',
-      socialMediaPack: 'Pack de elementos para publicaciones en redes sociales (feed).',
-      instagramStory: 'Historia en Instagram.',
-      packaging: 'Empaque de producto.',
-      reproduction: 'Para reproducción constante dentro de un producto de pago (ropa, accesorios, stickers, álbum de música, portada de libro digital o físico).',
-    },
-    contentMessage: 'Contenido o Mensaje',
-    contentMessageDescription: 'Esto no se trata de describir la idea exacta o los personajes, sino qué mensaje te gustaría comunicar.',
-    contentMessageExample: 'Ejemplo: Me gustaría que la imagen transmita paz, calma, silencio. Algo meditativo y sanador pero no la típica imagen de un Buda meditando.',
-    contentMessageQuestion: '¿Qué quieres que comunique la ilustración?',
-    keywords: 'Palabras Clave',
-    keywordsDescription: 'Describe 5 características o sentimientos que quieres que este trabajo transmita:',
-    keywordsExample: 'Ejemplo: playero, relajado, tropical, frutal, sabroso.',
-    style: 'Estilo',
-    styleDescription: 'La idea es que puedas elegir, dentro de mi trabajo, entre 3 y 5 imágenes de referencia para que entienda qué tipo de imagen te gustaría lograr. Para eso puedes mirar mis redes sociales:',
-    graphicElements: 'Elementos Gráficos',
-    graphicElementsOptions: {
-      harmony: 'Tengo elementos gráficos de mi emprendimiento y quiero continuar en armonía con esa línea.',
-      change: 'Tengo elementos gráficos pero busco un cambio de esa estética.',
-      create: 'No los tengo y quiero crearlos.',
-    },
-    text: 'Texto',
-    textDescription: 'En caso de que la ilustración vaya acompañada de texto, escribe aquí la(s) palabra(s) exacta(s):',
-    deliveryDate: 'Fecha de Entrega',
-    deliveryDateQuestion: '¿En qué fecha necesitas la entrega final de la ilustración?',
-    importantInfo: 'Información Importante',
-    importantInfoQuestion: '¿Hay algo más que no haya preguntado que deba considerarse para el proyecto?',
-    submit: 'Enviar Solicitud de Cotización',
-  }
+const fieldTranslations = {
+  'Nombre Completo': { en: 'Full Name', es: 'Nombre Completo' },
+  'Correo Electrónico': { en: 'Email', es: 'Correo Electrónico' },
+  'Mensaje': { en: 'Message', es: 'Mensaje' },
+  'Descripción del Emprendimiento': { en: 'Venture Description', es: 'Descripción del Emprendimiento' },
+  'Productos o Servicios': { en: 'Products or Services', es: 'Productos o Servicios' },
+  'Público Objetivo': { en: 'Target Audience', es: 'Público Objetivo' },
+  'Eslogan': { en: 'Slogan', es: 'Eslogan' },
+  'Redes Sociales': { en: 'Social Networks', es: 'Redes Sociales' },
+  'Uso de Ilustración': { en: 'Illustration Use', es: 'Uso de Ilustración' },
+  'Contenido o Mensaje': { en: 'Content or Message', es: 'Contenido o Mensaje' },
+  'Palabras Clave': { en: 'Keywords', es: 'Palabras Clave' },
+}
+
+const errorMessages = {
+  'Nombre Completo': { en: 'Full name is required', es: 'El nombre completo es requerido' },
+  'Correo Electrónico': { en: 'Valid email is required', es: 'Se requiere un correo electrónico válido' },
+  'Mensaje': { en: 'Message is required', es: 'El mensaje es requerido' },
+  'Descripción del Emprendimiento': { en: 'Venture description is required', es: 'La descripción del emprendimiento es requerida' },
+  'Productos o Servicios': { en: 'Products or services are required', es: 'Los productos o servicios son requeridos' },
+  'Público Objetivo': { en: 'Target audience is required', es: 'El público objetivo es requerido' },
+  'Uso de Ilustración': { en: 'Select at least one option', es: 'Selecciona al menos una opción' },
+  'Contenido o Mensaje': { en: 'Content or message is required', es: 'El contenido o mensaje es requerido' },
+  'Palabras Clave': { en: 'At least one keyword is required', es: 'Se requiere al menos una palabra clave' },
+}
+
+const placeholders = {
+  'Nombre Completo': { en: 'Enter your full name', es: 'Ingrese su nombre completo' },
+  'Correo Electrónico': { en: 'Enter your email', es: 'Ingrese su correo electrónico' },
+  'Mensaje': { en: 'Enter your message', es: 'Ingrese su mensaje' },
+  'Descripción del Emprendimiento': { en: 'Describe your venture', es: 'Describa su emprendimiento' },
+  'Productos o Servicios': { en: 'List your products or services', es: 'Liste sus productos o servicios' },
+  'Público Objetivo': { en: 'Who is your target audience?', es: '¿Quién es su público objetivo?' },
+  'Eslogan': { en: 'Enter your slogan if you have one', es: 'Ingrese su eslogan si tiene uno' },
+  'Redes Sociales': { en: 'List your social networks', es: 'Liste sus redes sociales' },
+  'Contenido o Mensaje': { en: 'What do you want the illustration to communicate?', es: '¿Qué quieres que la ilustración comunique?' },
+  'Palabras Clave': { en: 'Keyword 1, Keyword 2, Keyword 3, Keyword 4, Keyword 5', es: 'Palabra clave 1, Palabra clave 2, Palabra clave 3, Palabra clave 4, Palabra clave 5' },
+}
+
+const getFieldLabel = (fieldName: string, language: 'en' | 'es') => {
+  return fieldTranslations[fieldName][language]
 }
 
 export default function Quotation() {
-  const [language, setLanguage] = useState('es')
-  const t = translations[language]
-  const { register, handleSubmit, formState: { errors } } = useForm()
-  const [date, setDate] = useState(new Date())
+  const [language, setLanguage] = useState<'en' | 'es'>('es')
+  
+  const schema = useCallback(() => yup.object({
+    'Nombre Completo': yup.string().required(errorMessages['Nombre Completo'][language]),
+    'Correo Electrónico': yup.string().email(errorMessages['Correo Electrónico'][language]).required(errorMessages['Correo Electrónico'][language]),
+    'Mensaje': yup.string().required(errorMessages['Mensaje'][language]),
+    'Descripción del Emprendimiento': yup.string().required(errorMessages['Descripción del Emprendimiento'][language]),
+    'Productos o Servicios': yup.string().required(errorMessages['Productos o Servicios'][language]),
+    'Público Objetivo': yup.string().required(errorMessages['Público Objetivo'][language]),
+    'Eslogan': yup.string(),
+    'Redes Sociales': yup.string(),
+    'Uso de Ilustración': yup.object().test({
+      name: 'at-least-one-checked',
+      message: language === 'en' ? 'Select at least one option' : 'Selecciona al menos una opción',
+      test: (value) => Object.values(value || {}).some(Boolean),
+    }),
+    'Contenido o Mensaje': yup.string().required(errorMessages['Contenido o Mensaje'][language]),
+    'Palabras Clave': yup.string().required(errorMessages['Palabras Clave'][language]),
+  }).required(), [language])
+
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    resolver: yupResolver(schema())
+  })
 
   const onSubmit = async (data) => {
-    const response = await fetch('https://formspree.io/f/your-form-id', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-    if (response.ok) {
-      // Handle successful submission
-      console.log('Form submitted successfully')
-    } else {
-      // Handle error
-      console.error('Form submission failed')
+    // Convertir el objeto de "Uso de Ilustración" a un array de opciones seleccionadas
+    const usoIlustracionSeleccionado = Object.entries(data['Uso de Ilustración'] || {})
+      .filter(([_, isChecked]) => isChecked)
+      .map(([value]) => value)
+    
+    const dataToSubmit = {
+      ...data,
+      'Uso de Ilustración': usoIlustracionSeleccionado
+    }
+
+    try {
+      const response = await fetch('https://formspree.io/f/mnnakpaz', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(dataToSubmit),
+      })
+      if (response.ok) {
+        alert(language === 'en' ? 'Form submitted successfully' : 'Formulario enviado exitosamente')
+      } else {
+        throw new Error(language === 'en' ? 'Form submission failed' : 'Error al enviar el formulario')
+      }
+    } catch (error) {
+      console.error('Error:', error)
+      alert(language === 'en' ? 'There was an error submitting the form' : 'Hubo un error al enviar el formulario')
     }
   }
 
+  const opcionesUsoIlustracion = [
+    { value: 'Logo', label: { en: 'Logo. Image or identity of the brand and/or company.', es: 'Logo. Imagen o identidad de la marca y/o empresa.' } },
+    { value: 'Flyer', label: { en: 'Flyer. Promotion and/or campaign with a defined duration.', es: 'Flyer. Promoción y/o campaña con una duración definida.' } },
+    { value: 'Publicación en redes sociales', label: { en: 'Publication in social networks (feed).', es: 'Publicación en redes sociales (feed).' } },
+    { value: 'Pack de elementos para redes sociales', label: { en: 'Pack of elements for publications on social networks (feed).', es: 'Pack de elementos para publicaciones en redes sociales (feed).' } },
+    { value: 'Historia en Instagram', label: { en: 'Story on Instagram.', es: 'Historia en Instagram.' } },
+    { value: 'Packaging de producto', label: { en: 'Product packaging.', es: 'Packaging de producto.' } },
+    { value: 'Reproducción constante', label: { en: 'For constant reproduction inside a paid product (clothing, accessories, stickers, music album, digital or physical book cover).', es: 'Para reproducción constante dentro de un producto de pago (prendas de ropa, accesorios, stickers, álbum de música, carátula de libro digital o físico).' } },
+  ]
+
   return (
-    <div className="min-h-screen bg-[#F1D9D2] text-[#523524]">
-      <div className="container mx-auto px-4 py-8">
-        <header className="flex justify-between items-center mb-8">
-          <Link href="/" className="font-klee text-3xl text-[#853C29]">
-            kusikay
-          </Link>
-          <button
-            onClick={() => setLanguage(language === 'es' ? 'en' : 'es')}
-            className="px-4 py-2 rounded border border-[#523524] text-sm hover:bg-[#853C29] hover:text-[#F1D9D2] transition-colors duration-300 font-klee"
-          >
-            {t.language}
-          </button>
-        </header>
-        <main>
-          <h1 className="font-klee text-4xl text-[#853C29] mb-4">{t.title}</h1>
-          <p className="font-inter text-lg mb-8">{t.subtitle}</p>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-            <section>
-              <h2 className="font-klee text-2xl text-[#853C29] mb-4">{t.customerInfo}</h2>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="fullName">{t.fullName}</Label>
-                  <Input id="fullName" {...register('fullName', { required: true })} />
-                </div>
-                <div>
-                  <Label htmlFor="phoneNumber">{t.phoneNumber}</Label>
-                  <Input id="phoneNumber" {...register('phoneNumber', { required: true })} />
-                </div>
-                <div>
-                  <Label htmlFor="email">{t.email}</Label>
-                  <Input id="email" type="email" {...register('email', { required: true })} />
-                </div>
-              </div>
-            </section>
-
-            <section>
-              <h2 className="font-klee text-2xl text-[#853C29] mb-4">{t.ventureDescription}</h2>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="ventureAbout">{t.ventureAbout}</Label>
-                  <Textarea id="ventureAbout" {...register('ventureAbout', { required: true })} />
-                </div>
-                <div>
-                  <Label htmlFor="productsServices">{t.productsServices}</Label>
-                  <Textarea id="productsServices" {...register('productsServices', { required: true })} />
-                </div>
-                <div>
-                  <Label htmlFor="targetAudience">{t.targetAudience}</Label>
-                  <Input id="targetAudience" {...register('targetAudience', { required: true })} />
-                </div>
-                <div>
-                  <Label htmlFor="slogan">{t.slogan}</Label>
-                  <Input id="slogan" {...register('slogan')} />
-                </div>
-                <div>
-                  <Label htmlFor="socialNetworks">{t.socialNetworks}</Label>
-                  <Input id="socialNetworks" {...register('socialNetworks')} />
-                </div>
-              </div>
-            </section>
-
-            <section>
-              <h2 className="font-klee text-2xl text-[#853C29] mb-4">{t.illustrationUse}</h2>
-              <div className="space-y-2">
-                {Object.entries(t.illustrationUseOptions).map(([key, value]) => (
-                  <div key={key} className="flex items-center space-x-2">
-                    <Checkbox id={key} {...register('illustrationUse')} />
-                    <Label htmlFor={key}>{value}</Label>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            <section>
-              <h2 className="font-klee text-2xl text-[#853C29] mb-4">{t.contentMessage}</h2>
-              <p className="font-inter text-sm mb-2">{t.contentMessageDescription}</p>
-              <p className="font-inter text-sm italic mb-4">{t.contentMessageExample}</p>
-              <Textarea {...register('contentMessage', { required: true })} placeholder={t.contentMessageQuestion} />
-            </section>
-
-            <section>
-              <h2 className="font-klee text-2xl text-[#853C29] mb-4">{t.keywords}</h2>
-              <p className="font-inter text-sm mb-2">{t.keywordsDescription}</p>
-              <p className="font-inter text-sm italic mb-4">{t.keywordsExample}</p>
-              <Input {...register('keywords', { required: true })} placeholder="Keyword 1, Keyword 2, Keyword 3, Keyword 4, Keyword 5" />
-            </section>
-
-            <section>
-              <h2 className="font-klee text-2xl text-[#853C29] mb-4">{t.style}</h2>
-              <p className="font-inter text-sm mb-4">{t.styleDescription}</p>
-              <div className="flex space-x-4">
-                <a href="https://www.behance.net/mercedesducos" target="_blank" rel="noopener noreferrer" className="text-[#853C29] hover:underline">Behance</a>
-                <a href="https://www.instagram.com/kusikay.art" target="_blank" rel="noopener noreferrer" className="text-[#853C29] hover:underline">Instagram</a>
-              </div>
-              <Input type="file" multiple {...register('styleReferences')} className="mt-4" />
-            </section>
-
-            <section>
-              <h2 className="font-klee text-2xl text-[#853C29] mb-4">{t.graphicElements}</h2>
-              <RadioGroup defaultValue="create">
-                {Object.entries(t.graphicElementsOptions).map(([key, value]) => (
-                  <div key={key} className="flex items-center space-x-2">
-                    <RadioGroupItem value={key} id={key} {...register('graphicElements')} />
-                    <Label htmlFor={key}>{value}</Label>
-                  </div>
-                ))}
-              </RadioGroup>
-              <Input type="file" {...register('graphicElementsFile')} className="mt-4" />
-            </section>
-
-            <section>
-              <h2 className="font-klee text-2xl text-[#853C29] mb-4">{t.text}</h2>
-              <p className="font-inter text-sm mb-4">{t.textDescription}</p>
-              <Input {...register('text')} />
-            </section>
-
-            <section>
-              <h2 className="font-klee text-2xl text-[#853C29] mb-4">{t.deliveryDate}</h2>
-              <p className="font-inter text-sm mb-4">{t.deliveryDateQuestion}</p>
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={setDate}
-                className="rounded-md border"
-              />
-            </section>
-
-            <section>
-              <h2 className="font-klee text-2xl text-[#853C29] mb-4">{t.importantInfo}</h2>
-              <Textarea {...register('importantInfo')} placeholder={t.importantInfoQuestion} />
-            </section>
-
-            <Button type="submit" className="w-full bg-[#853C29] hover:bg-[#6A2F21] text-white">
-              {t.submit}
-            </Button>
-          </form>
-        </main>
+    <div className="min-h-screen bg-[#F1D9D2] text-[#523524] p-4">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">{language === 'en' ? 'Request a Quote' : 'Solicitar una Cotización'}</h1>
+        <Button 
+          onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}
+          className="bg-[#853C29] hover:bg-[#6A2F21] text-white"
+        >
+          {language === 'en' ? 'Cambiar a Español' : 'Switch to English'}
+        </Button>
       </div>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {Object.keys(fieldTranslations).map((fieldName) => (
+          <div key={fieldName}>
+            <Label htmlFor={fieldName}>{getFieldLabel(fieldName, language)}</Label>
+            {fieldName === 'Mensaje' || fieldName === 'Descripción del Emprendimiento' || fieldName === 'Productos o Servicios' ? (
+              <Textarea 
+                id={fieldName} 
+                {...register(fieldName)} 
+                placeholder={placeholders[fieldName][language]}
+              />
+            ) : fieldName === 'Uso de Ilustración' ? (
+              <div className="space-y-2">
+                {opcionesUsoIlustracion.map((opcion) => (
+                  <div key={opcion.value} className="flex items-center">
+                    <Checkbox
+                      id={`${fieldName}-${opcion.value}`}
+                      {...register(`Uso de Ilustración.${opcion.value}`)}
+                    />
+                    <Label htmlFor={`${fieldName}-${opcion.value}`} className="ml-2">
+                      {opcion.label[language]}
+                    </Label>
+                  </div>
+                ))}
+                {errors['Uso de Ilustración'] && <p className="text-red-500">{errors['Uso de Ilustración'].message}</p>}
+              </div>
+            ) : fieldName === 'Contenido o Mensaje' ? (
+              <>
+                <p className="text-sm text-gray-600 mb-2">
+                  {language === 'en' 
+                    ? "This is not about describing the exact idea or characters, but what is the message you would like to communicate."
+                    : "No se trata de que describas la idea exacta ni los personajes, sino cuál es el mensaje que te gustaría comunicar."}
+                </p>
+                <p className="text-sm italic text-gray-600 mb-2">
+                  {language === 'en'
+                    ? "For example: I would like the image to convey peace, calm, silence. Something like meditative and also healing but not the typical image of Buddha meditating."
+                    : "Por ejemplo: quisiera que la imagen transmita paz, calma, silencio. Algo como meditativo y también de sanación pero que no sea la típica imagen de buda meditando."}
+                </p>
+                <Textarea 
+                  id={fieldName} 
+                  {...register(fieldName)} 
+                  placeholder={placeholders[fieldName][language]}
+                />
+              </>
+            ) : fieldName === 'Palabras Clave' ? (
+              <>
+                <p className="text-sm text-gray-600 mb-2">
+                  {language === 'en' 
+                    ? "Enter up to 5 keywords that describe your project or the feeling you want to convey."
+                    : "Ingrese hasta 5 palabras clave que describan su proyecto o el sentimiento que desea transmitir."}
+                </p>
+                <Input 
+                  id={fieldName} 
+                  {...register(fieldName)} 
+                  placeholder={placeholders[fieldName][language]}
+                />
+              </>
+            ) : (
+              <Input 
+                id={fieldName} 
+                type={fieldName === 'Correo Electrónico' ? 'email' : 'text'} 
+                {...register(fieldName)} 
+                placeholder={placeholders[fieldName][language]}
+              />
+            )}
+            {errors[fieldName] && <p className="text-red-500">{errors[fieldName].message}</p>}
+          </div>
+        ))}
+        
+        <Button type="submit">{language === 'en' ? 'Submit' : 'Enviar'}</Button>
+      </form>
     </div>
   )
 }

@@ -1,4 +1,6 @@
 /** @type {import('tailwindcss').Config} */
+const { fontFamily } = require('tailwindcss/defaultTheme')
+
 module.exports = {
   content: [
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -7,7 +9,7 @@ module.exports = {
     extend: {
       fontFamily: {
         'sue-ellen': ['"Sue Ellen Francisco"', 'cursive'],
-        'roboto': ['Roboto', 'sans-serif'],
+        'roboto': ['Roboto', ...fontFamily.sans],
       },
       colors: {
         'kusikay-bg': '#F1D9D2',

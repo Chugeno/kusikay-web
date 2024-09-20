@@ -7,10 +7,22 @@
     "start": "next start"
   },
   "dependencies": {
+    "@hookform/resolvers": "^3.9.0",
+    "@radix-ui/react-checkbox": "^1.1.1",
+    "@radix-ui/react-label": "^2.1.0",
+    "@radix-ui/react-radio-group": "^1.2.0",
+    "date-fns": "^4.1.0",
     "framer-motion": "^11.5.4",
+    "fs": "^0.0.1-security",
+    "glob": "^11.0.0",
+    "gray-matter": "^4.0.3",
     "next": "latest",
+    "path": "^0.12.7",
     "react": "latest",
-    "react-dom": "latest"
+    "react-dom": "latest",
+    "react-hook-form": "^7.53.0",
+    "react-markdown": "^9.0.1",
+    "yup": "^1.4.0"
   },
   "devDependencies": {
     "@types/node": "latest",
