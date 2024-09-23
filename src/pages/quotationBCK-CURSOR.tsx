@@ -9,7 +9,6 @@ import { Button } from "../components/ui/button"
 import { Checkbox } from "../components/ui/checkbox"
 import StyleField from "../components/StyleField"
 import GraphicElements from "../components/GraphicElements"
-import { Progress } from "../components/ui/progress"
 
 const fieldTranslations = {
   'Nombre Completo': { en: 'Full Name', es: 'Nombre Completo' },
@@ -73,11 +72,8 @@ const getFieldLabel = (fieldName: string, language: 'en' | 'es') => {
 
 export default function Quotation() {
   const [language, setLanguage] = useState<'en' | 'es'>('es')
+  const [styleUrls, setStyleUrls] = useState<string[]>([])
   const [styleFiles, setStyleFiles] = useState<File[] | null>(null)
-  const [uploadProgress, setUploadProgress] = useState(0)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSending, setIsSending] = useState(false)
-  const [isSubmitted, setIsSubmitted] = useState(false)
     
   const schema = useCallback(() => yup.object({
     'Nombre Completo': yup.string().required(errorMessages['Nombre Completo'][language]),
@@ -114,42 +110,45 @@ export default function Quotation() {
     resolver: yupResolver(schema())
   })
 
-  const { handleSubmit, formState: { errors }, reset } = methods
+  const { handleSubmit, formState: { errors } } = methods
 
-  const onSubmit = async (data: any, event: React.FormEvent<HTMLFormElement>) => {
-    console.log('Formulario enviado', data);
+  const onSubmit = async (data, event) => {
     event.preventDefault();
-    setIsSubmitting(true);
-    setUploadProgress(0);
-    setIsSending(true);
+    
+    // Subir archivos de Estilo a Cloudinary
+    const uploadedStyleUrls = await uploadFilesToCloudinary(data['Nombre Completo'], styleFiles || [], 'Estilos');
+    
+    // Subir archivos de Elementos Gráficos a Cloudinary si es necesario
+    let uploadedGraphicElementsUrls = [];
+    if (data.ElementosGraficos.opcion === 'continuar' || data.ElementosGraficos.opcion === 'cambiar') {
+      const files = data.ElementosGraficos.archivos;
+      if (files && files.length > 0) {
+        const uploadedUrls = await uploadFilesToCloudinary(data['Nombre Completo'], files, 'ElementosGraficos');
+        uploadedGraphicElementsUrls = uploadedUrls;
+      }
+    }
+
+    console.log('Datos del formulario:', { 
+      ...data, 
+      'Imágenes de Estilo': uploadedStyleUrls,
+      'Imágenes de Elementos Gráficos': uploadedGraphicElementsUrls 
+    });
+    
+    const formData = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+      if (key === 'Uso de Ilustración') {
+        const selectedOptions = Object.entries(value)
+          .filter(([_, isChecked]) => isChecked)
+          .map(([option]) => option);
+        formData.append(key, selectedOptions.join(', '));
+      } else if (key !== 'Estilo' && key !== 'ElementosGraficos') {
+        formData.append(key, value as string);
+      }
+    });
+    formData.append('Imágenes de Estilo', uploadedStyleUrls.join(', '));
+    formData.append('Imágenes de Elementos Gráficos', uploadedGraphicElementsUrls.join(', '));
     
     try {
-      // Subir archivos de Estilo a Cloudinary
-      const uploadedStyleUrls = await uploadFilesToCloudinary(data['Nombre Completo'], styleFiles || [], 'Estilos');
-      
-      // Subir archivos de Elementos Gráficos a Cloudinary si es necesario
-      let uploadedGraphicElementsUrls: string[] = [];
-      if (data.ElementosGraficos.opcion === 'continuar' || data.ElementosGraficos.opcion === 'cambiar') {
-        const files = data.ElementosGraficos.archivos;
-        if (files && files.length > 0) {
-          uploadedGraphicElementsUrls = await uploadFilesToCloudinary(data['Nombre Completo'], files, 'ElementosGraficos');
-        }
-      }
-
-      const formData = new FormData();
-      Object.entries(data).forEach(([key, value]) => {
-        if (key === 'Uso de Ilustración') {
-          const selectedOptions = Object.entries(value as Record<string, boolean>)
-            .filter(([_, isChecked]) => isChecked)
-            .map(([option]) => option);
-          formData.append(key, selectedOptions.join(', '));
-        } else if (key !== 'Estilo' && key !== 'ElementosGraficos') {
-          formData.append(key, value as string);
-        }
-      });
-      formData.append('Imágenes de Estilo', uploadedStyleUrls.join(', '));
-      formData.append('Imágenes de Elementos Gráficos', uploadedGraphicElementsUrls.join(', '));
-      
       const response = await fetch('https://formspree.io/f/mnnakpaz', {
         method: 'POST',
         body: formData,
@@ -158,14 +157,13 @@ export default function Quotation() {
         }
       });
       
+      console.log('Respuesta del servidor:', response);
+      
       if (response.ok) {
-        setIsSending(false);
-        setIsSubmitted(true);
-        setTimeout(() => {
-          setIsSubmitted(false);
-          reset();
-          setStyleFiles(null);
-        }, 3000);
+        alert(language === 'en' ? 'Form submitted successfully' : 'Formulario enviado exitosamente');
+        methods.reset();
+        setStyleUrls([]);
+        setStyleFiles(null);
       } else {
         const errorText = await response.text();
         console.error('Error response:', errorText);
@@ -174,18 +172,11 @@ export default function Quotation() {
     } catch (error) {
       console.error('Error:', error);
       alert(language === 'en' ? 'There was an error submitting the form' : 'Hubo un error al enviar el formulario');
-    } finally {
-      setIsSubmitting(false);
-      setUploadProgress(0);
-      setIsSending(false);
     }
   }
 
   const uploadFilesToCloudinary = async (userName: string, files: File[], folder: string) => {
-    const uploadedUrls: string[] = [];
-    const totalFiles = files.length;
-    let completedUploads = 0;
-
+    const uploadedUrls = [];
     for (const file of files) {
       const formData = new FormData();
       formData.append('file', file);
@@ -200,8 +191,6 @@ export default function Quotation() {
       if (response.ok) {
         const data = await response.json();
         uploadedUrls.push(data.secure_url);
-        completedUploads++;
-        setUploadProgress((completedUploads / totalFiles) * 100);
       } else {
         console.error('Error uploading file:', file.name);
       }
@@ -318,48 +307,19 @@ export default function Quotation() {
                   placeholder={placeholders[fieldName]?.[language] || ''}
                 />
               )}
-              {errors[fieldName] && <p className="text-red-500">{errors[fieldName]?.message}</p>}
+              {errors[fieldName] && <p className="text-red-500">{errors[fieldName].message}</p>}
             </div>
           ))}
         </form>
         
-        {isSubmitting && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white p-4 rounded-lg">
-              <p className="mb-2">{language === 'en' ? 'Uploading files...' : 'Subiendo archivos...'}</p>
-              <Progress value={uploadProgress} className="w-64" />
-            </div>
-          </div>
-        )}
-
-        {isSending && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white p-4 rounded-lg">
-              <p className="mb-2">{language === 'en' ? 'Sending form...' : 'Enviando formulario...'}</p>
-              <Progress value={uploadProgress} className="w-64" />
-            </div>
-          </div>
-        )}
-
-        {isSubmitted && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white p-4 rounded-lg">
-              <p className="mb-2">{language === 'en' ? 'Form submitted successfully!' : '¡Formulario enviado exitosamente!'}</p>
-            </div>
-          </div>
-        )}
-
         {/* Botón flotante */}
         <div className="fixed bottom-4 left-0 right-0 flex justify-center">
           <Button 
             type="submit"
             form="quotationForm"
             className="bg-[#853C29] hover:bg-[#6A2F21] text-white px-8 py-3 rounded-full shadow-lg"
-            disabled={isSubmitting}
           >
-            {isSubmitting 
-              ? (language === 'en' ? 'Submitting...' : 'Enviando...') 
-              : (language === 'en' ? 'Submit' : 'Enviar')}
+            {language === 'en' ? 'Submit' : 'Enviar'}
           </Button>
         </div>
       </div>
