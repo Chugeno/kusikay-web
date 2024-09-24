@@ -59,6 +59,7 @@ export default function GraphicElements({ language }: GraphicElementsProps) {
           fieldName="ElementosGraficos.archivos"
           folder="ElementosGraficos"
           onFileChange={handleFileChange}
+          buttonClassName="bg-[#853C29] hover:bg-[#6A2F21] text-white px-8 py-3 rounded-full shadow-lg"
         />
       )}
     </div>

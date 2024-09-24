@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 const translations = {
   en: "Quote",
-  es: "Cotización"
+  es: "Presupuesto"
 }
 
 export default function FloatingButton() {

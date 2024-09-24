@@ -23,14 +23,14 @@ export default function StyleField({ language, onFileChange, files, onRemoveFile
         <Button 
           type="button"
           onClick={() => window.open('https://behance.net/mercedesducos', '_blank')}
-          className="bg-[#853C29] hover:bg-[#6A2F21] text-white px-8 py-3 rounded-full shadow-lg"
+          className="bg-[#853C29] hover:bg-[#6A2F21] text-white"
         >
           Behance
         </Button>
         <Button 
           type="button"
           onClick={() => window.open('https://instagram.com/kusikay.ilustracion/', '_blank')}
-          className="bg-[#853C29] hover:bg-[#6A2F21] text-white px-8 py-3 rounded-full shadow-lg"
+          className="bg-[#853C29] hover:bg-[#6A2F21] text-white"
         >
           Instagram
         </Button>
@@ -47,7 +47,7 @@ export default function StyleField({ language, onFileChange, files, onRemoveFile
       <Button 
         type="button"
         onClick={() => document.getElementById('Estilo')?.click()}
-        className="bg-[#853C29] hover:bg-[#6A2F21] text-white px-8 py-3 rounded-full shadow-lg mb-2"
+        className="bg-[#853C29] hover:bg-[#6A2F21] text-white mb-2"
       >
         {language === 'en' ? 'Select Files' : 'Seleccionar Archivos'}
       </Button>
@@ -62,7 +62,6 @@ export default function StyleField({ language, onFileChange, files, onRemoveFile
                   onClick={() => onRemoveFile(index)}
                   variant="destructive"
                   size="sm"
-                  className="bg-red-500 hover:bg-red-700 text-white px-2 py-1 rounded-full"
                 >
                   {language === 'en' ? 'Remove' : 'Eliminar'}
                 </Button>
