@@ -7,9 +7,10 @@ interface FileUploadProps {
   fieldName: string;
   folder: string;
   onFileChange: (files: File[]) => void;
+  buttonClassName?: string; // Añadir esta línea
 }
 
-export default function FileUpload({ language, fieldName, folder, onFileChange }: FileUploadProps) {
+export default function FileUpload({ language, fieldName, folder, onFileChange, buttonClassName }: FileUploadProps) {
   const [files, setFiles] = useState<File[]>([])
   const { register, setValue } = useFormContext()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -59,6 +60,7 @@ export default function FileUpload({ language, fieldName, folder, onFileChange }
                 <Button 
                   type="button"
                   onClick={() => removeFile(index)}
+                  className={buttonClassName}
                 >
                   {language === 'en' ? 'Remove' : 'Eliminar'}
                 </Button>
