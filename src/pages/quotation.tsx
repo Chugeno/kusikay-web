@@ -16,6 +16,7 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import Layout from '../components/Layout'  // Importar el componente Layout
 import { useLanguage } from '../contexts/LanguageContext'
+import Layout2 from '../components/Layout2'
 
 const fieldTranslations = {
   'Nombre Completo': { en: 'Full Name', es: 'Nombre Completo' },
@@ -235,22 +236,9 @@ export default function Quotation() {
   return (
     <FormProvider {...methods}>
     {/* para volver al encabezado general de la web cambiar layout por Layout, importante la mayuscula, y borrar el h1 que dice KYSIKAY MERCEDES DUCOS etc */}
-    <layout> 
+    <Layout2> 
       <div className="min-h-screen bg-[#F1D9D2] text-[#523524] p-4 pb-20 flex justify-center">
-        <div className="w-full max-w-3xl">
-          <div className="text-center mb-8">
-            <h1 className="font-sue-ellen text-5xl text-kusikay-accent uppercase">KUSIKAY</h1>
-            <p className="font-roboto text-lg md:text-sm mb-8">
-            {language === 'en' ? 'by Mercedes Ducos' : 'por Mercedes Ducos'}</p>
-            <div className="absolute top-4 right-4">
-              <button 
-                onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}
-                className="px-3 py-1 rounded border border-kusikay-text text-3xsm hover:bg-kusikay-accent hover:text-kusikay-bg transition-colors duration-300"
-              >
-                {language === 'en' ? 'English' : 'Español'}
-              </button>
-            </div>
-          </div>
+        <div className="w-full max-w-3xl">          
           <h1 className="text-4xl font-bold mb-8 text-center text-[#853C29]">
             {language === 'en' ? 'Order Illustration' : 'Pedido de Ilustración'}
           </h1>
@@ -400,7 +388,7 @@ export default function Quotation() {
           </div>
         </div>
       </div>
-    </layout>
+    </Layout2> {/* para volver al encabezado general de la web cambiar Layout2 por Layout */}
     </FormProvider>
   )
 }

@@ -25,11 +25,12 @@ const translations = {
     writings: 'Escritos',
     biography: 'Biografía',
     contact: 'Contacto',
-    quotation: 'Cotización',
+    quotation: 'Presupuesto',
   },
 }
 
-const menuItems = ['illustrations', 'crafts', 'murals', 'writings', 'biography', 'contact']
+// const menuItems = ['illustrations', 'crafts', 'murals', 'writings', 'biography', 'contact'] Descomentar para mostrar todas las opciones
+const menuItems = ['contact']
 
 const HomePage: NextPage = () => {
   const { language, setLanguage } = useLanguage()
