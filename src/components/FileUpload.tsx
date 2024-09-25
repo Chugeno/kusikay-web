@@ -8,7 +8,7 @@ interface FileUploadProps {
   folder: string;
   onFileChange: (files: File[]) => void;
   buttonClassName?: string; // Añadir esta línea
-}
+
 
 export default function FileUpload({ language, fieldName, folder, onFileChange, buttonClassName }: FileUploadProps) {
   const [files, setFiles] = useState<File[]>([])
@@ -57,13 +57,13 @@ export default function FileUpload({ language, fieldName, folder, onFileChange, 
             {files.map((file, index) => (
               <li key={index} className="flex items-center space-x-2">
                 <span>{file.name}</span>
-                <Button 
+                <button 
                   type="button"
                   onClick={() => removeFile(index)}
                   className={buttonClassName}
                 >
                   {language === 'en' ? 'Remove' : 'Eliminar'}
-                </Button>
+                </button>
               </li>
             ))}
           </ul>
