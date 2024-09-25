@@ -56,12 +56,12 @@ export default function FileUpload({ language, fieldName, folder, onFileChange }
             {files.map((file, index) => (
               <li key={index} className="flex items-center space-x-2">
                 <span>{file.name}</span>
-                <button 
+                <Button 
                   type="button"
                   onClick={() => removeFile(index)}
                 >
                   {language === 'en' ? 'Remove' : 'Eliminar'}
-                </button>
+                </Button>
               </li>
             ))}
           </ul>
