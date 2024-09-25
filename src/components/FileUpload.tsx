@@ -59,8 +59,7 @@ export default function FileUpload({ language, fieldName, folder, onFileChange }
                 <Button 
                   type="button"
                   onClick={() => removeFile(index)}
-                  variant="destructive"
-                  size="sm"
+                  className="bg-[#853C29] hover:bg-[#6A2F21] text-white"
                 >
                   {language === 'en' ? 'Remove' : 'Eliminar'}
                 </Button>
