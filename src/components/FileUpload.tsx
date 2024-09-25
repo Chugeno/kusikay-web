@@ -1,16 +1,16 @@
-import { useState, useRef } from 'react'
+import React, { useState, useRef } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { Button } from "./ui/button"
 
 interface FileUploadProps {
-  language: 'en' | 'es';
+  language: 'es' | 'en';
   fieldName: string;
   folder: string;
   onFileChange: (files: File[]) => void;
   buttonClassName?: string; // Añadir esta línea
+}
 
-
-export default function FileUpload({ language, fieldName, folder, onFileChange, buttonClassName }: FileUploadProps) {
+const FileUpload: React.FC<FileUploadProps> = ({ language, fieldName, folder, onFileChange, buttonClassName }) => {
   const [files, setFiles] = useState<File[]>([])
   const { register, setValue } = useFormContext()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -73,3 +73,5 @@ export default function FileUpload({ language, fieldName, folder, onFileChange, 
     </div>
   )
 }
+
+export default FileUpload
