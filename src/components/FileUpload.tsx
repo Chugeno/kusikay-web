@@ -56,13 +56,12 @@ export default function FileUpload({ language, fieldName, folder, onFileChange }
             {files.map((file, index) => (
               <li key={index} className="flex items-center space-x-2">
                 <span>{file.name}</span>
-                <Button 
+                <button 
                   type="button"
                   onClick={() => removeFile(index)}
-                  className="bg-[#853C29] hover:bg-[#6A2F21] text-white"
                 >
                   {language === 'en' ? 'Remove' : 'Eliminar'}
-                </Button>
+                </button>
               </li>
             ))}
           </ul>
