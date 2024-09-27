@@ -7,60 +7,54 @@ interface FileUploadProps {
   fieldName: string;
   folder: string;
   onFileChange: (files: File[]) => void;
+  buttonClassName: string;
 }
 
-export default function FileUpload({ language, fieldName, folder, onFileChange }: FileUploadProps) {
-  const [files, setFiles] = useState<File[]>([])
-  const { register, setValue } = useFormContext()
-  const fileInputRef = useRef<HTMLInputElement>(null)
+export default function FileUpload({ language, fieldName, folder, onFileChange, buttonClassName }: FileUploadProps) {
+  const { register, setValue, watch } = useFormContext()
+  const files = watch(fieldName)
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      const newFiles = Array.from(event.target.files);
-      setFiles(newFiles);
-      onFileChange(newFiles);
-    }
+    const selectedFiles = Array.from(event.target.files || [])
+    onFileChange(selectedFiles)
+    setValue(fieldName, selectedFiles)
   }
 
   const removeFile = (index: number) => {
-    const newFiles = files.filter((_, i) => i !== index);
-    setFiles(newFiles);
-    onFileChange(newFiles);
+    const updatedFiles = files.filter((_: File, i: number) => i !== index)
+    onFileChange(updatedFiles)
+    setValue(fieldName, updatedFiles)
   }
 
   return (
     <div>
       <input 
+        id={fieldName} 
         type="file" 
         accept="image/*"
         multiple
+        {...register(fieldName)}
         onChange={handleFileChange}
         className="hidden"
-        ref={fileInputRef}
       />
       <Button 
         type="button"
-        onClick={() => fileInputRef.current?.click()}
-        className="bg-[#853C29] hover:bg-[#6A2F21] text-white mb-2"
+        onClick={() => document.getElementById(fieldName)?.click()}
+        className={buttonClassName}
       >
         {language === 'en' ? 'Select Files' : 'Seleccionar Archivos'}
       </Button>
-      {files.length === 0 ? (
-        <p className="mt-2">
-          {language === 'en' ? 'No files selected' : 'Ningún archivo seleccionado'}
-        </p>
-      ) : (
+      {files && files.length > 0 ? (
         <div className="mt-2">
           <p>{language === 'en' ? 'Selected files:' : 'Archivos seleccionados:'}</p>
           <ul>
-            {files.map((file, index) => (
+            {files.map((file: File, index: number) => (
               <li key={index} className="flex items-center space-x-2">
                 <span>{file.name}</span>
                 <Button 
                   type="button"
                   onClick={() => removeFile(index)}
-                  variant="destructive"
-                  size="sm"
+                  className="bg-red-500 hover:bg-red-700 text-white px-2 py-1 rounded-full"
                 >
                   {language === 'en' ? 'Remove' : 'Eliminar'}
                 </Button>
@@ -68,8 +62,11 @@ export default function FileUpload({ language, fieldName, folder, onFileChange }
             ))}
           </ul>
         </div>
+      ) : (
+        <p className="mt-2">
+          {language === 'en' ? 'No files selected' : 'Ningún archivo seleccionado'}
+        </p>
       )}
-      <input type="hidden" {...register(fieldName)} />
     </div>
   )
 }
